@@ -17,7 +17,7 @@ int main(void) {
 	DDRA = 0x00; PORTA = 0xFF;
 	DDRB = 0xFF; PORTB = 0x00;
     /* Insert your solution below */
-    enum LIGHT_STATES {LS_Start, LS_B0, LS_B1} LIGHT_STATE;
+    enum LIGHT_STATES {LS_Start, LS_B0, LS_B1Hold, LS_B1, LS_B0Hold} LIGHT_STATE;
     void Light_Contrl(){
     	switch(LIGHT_STATE){
     		case LS_Start:
@@ -25,18 +25,25 @@ int main(void) {
     		break;
     		case LS_B0:
     		if(PINA == 0x01){
-    			LIGHT_STATE = LS_B1;
+    			LIGHT_STATE = LS_B1Hold;
     		}
     		else{
     			LIGHT_STATE = LS_B0;
     		}
     		break;
+    		case LS_B1Hold:
+    		if(PINA == 0x00){
+    			LIGHT_STATE = LS_B1;
+    		}
+    		break;
     		case LS_B1:
     		if(PINA == 0x01){
-    			LIGHT_STATE = LS_B0;
+    			LIGHT_STATE = LS_B0Hold;
     		}
-    		else{
-    			LIGHT_STATE = LS_B1;
+    		break;
+    		case LS_B0Hold:
+    		if(PINA == 0x00){
+    			LIGHT_STATE = LS_B0;
     		}
     		break;
     		default:
@@ -46,11 +53,15 @@ int main(void) {
     	switch(LIGHT_STATE){
     		case LS_Start:
     		PORTB = 0x00;
+    		break;
     		case LS_B0:
     		PORTB = 0x01;
     		break;
-    		case LS_B1:
+    		case LS_B1Hold:
     		PORTB = 0x02;
+    		break;
+    		case LS_B0Hold:
+    		PORTB = 0x01;
     		break; 
     		default:
     		break;
