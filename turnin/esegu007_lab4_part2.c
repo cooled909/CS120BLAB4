@@ -18,6 +18,7 @@ int main(void) {
 	DDRC = 0xFF; PORTC = 0x00;
     /* Insert your solution below */
     enum STATE_MACHINE {SM_Start, SM_Wait, SM_Hold, SM_Inc, SM_Dec, SM_Clr} STATE;
+    enum STATE_MACHINE LASTSTATE;
     void Tick_Cnt(){
     	switch(STATE){
     		case SM_Start:
@@ -38,18 +39,26 @@ int main(void) {
     		if(PINA == 0x00){
     			STATE = SM_Wait;
     		}
-    		else if (PINA == 0x03)
-    		{
+    		else if (LASTSTATE != SM_Inc && PINA == 0x01){
+    			STATE = SM_Inc;
+    		}
+    		else if (LASTSTATE != SM_Dec && PINA == 0x02){
+    			STATE = SM_Dec;
+    		}
+    		else if (LASTSTATE != SM_Clr && PINA == 0x03){
     			STATE = SM_Clr;
     		}
     		break;
     		case SM_Inc:
+    		LASTSTATE = SM_Inc;
     		STATE = SM_Hold;
     		break;
     		case SM_Dec:
+    		LASTSTATE = SM_Clr;
     		STATE = SM_Hold;
     		break;
     		case SM_Clr:
+    		LASTSTATE = SM_Clr;
     		STATE = SM_Hold;
     		break;
     		default:

@@ -1,7 +1,7 @@
 /*	Author: Edward Segura
  *  Partner(s) Name: 
  *	Lab Section: 24
- *	Assignment: Lab 4  Exercise 3
+ *	Assignment: Lab 4  Exercise 2
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -15,75 +15,81 @@
 int main(void) {
     /* Insert DDR and PORT initializations */
 	DDRA = 0x00; PORTA = 0xFF;
-	DDRB = 0xFF; PORTB = 0x00;
 	DDRC = 0xFF; PORTC = 0x00;
     /* Insert your solution below */
-    enum STATE_MACHINE {SM_Start, SM_Lock, SM_A2Press, SM_A2Release, SM_Unlock} STATE;
+    enum STATE_MACHINE {SM_Start, SM_Wait, SM_Hold, SM_Inc, SM_Dec, SM_Clr} STATE;
+    enum STATE_MACHINE LASTSTATE;
     void Tick_Cnt(){
     	switch(STATE){
     		case SM_Start:
-    		STATE = SM_Lock;
+    		STATE = SM_Wait;
     		break;
-    		case SM_Lock:
-    		if(PINA == 0x04){
-    			STATE = SM_A2Press;
+    		case SM_Wait:
+    		if(PINA == 0x01){
+    			STATE = SM_Inc;
+    		}
+    		else if(PINA == 0x02){
+    			STATE = SM_Dec;
+    		}
+    		else if(PINA == 0x03){
+    			STATE = SM_Clr;
     		}
     		break;
-    		case SM_A2Press:
+    		case SM_Hold:
     		if(PINA == 0x00){
-    			STATE = SM_A2Release;
+    			STATE = SM_Wait;
     		}
-    		else if (PINA == 0x04)
-    		{
-    			STATE = SM_A2Press;
+    		else if (LASTSTATE != SM_Inc && PINA == 0x01){
+    			STATE = SM_Inc;
     		}
-    		else
-    		{
-    			STATE = SM_Lock;
+    		else if (LASTSTATE != SM_Dec && PINA == 0x02){
+    			STATE = SM_Dec;
     		}
-    		break;
-    		case SM_A2Release:
-    		if (PINA == 0x02)
-    		{
-    			STATE = SM_Unlock;
-    		}
-    		else if (PINA == 0x00){
-    			STATE = SM_A2Release;
-    		}
-    		else{
-    			STATE = SM_Lock;
+    		else if (LASTSTATE != SM_Clr && PINA == 0x03){
+    			STATE = SM_Clr;
     		}
     		break;
-    		case SM_Unlock:
-    		if (PINA == 0x80)
-    		{
-    			STATE = SM_Lock;
-    		}
+    		case SM_Inc:
+    		LASTSTATE = SM_Inc;
+    		STATE = SM_Hold;
+    		break;
+    		case SM_Dec:
+    		LASTSTATE = SM_Clr;
+    		STATE = SM_Hold;
+    		break;
+    		case SM_Clr:
+    		LASTSTATE = SM_Clr;
+    		STATE = SM_Hold;
     		break;
     		default:
-    		STATE = SM_Lock;
+    		STATE = SM_Wait;
     		break;
     	}
     	switch(STATE){
-    		case SM_Lock:
+    		case SM_Start:
+    		PORTC = 0x07;
+    		break;
+    		case SM_Inc:
+    		if(PORTC >= 0x09){
+    			break;
+    		}
+    		PORTC++;
+    		break;
+    		case SM_Dec:
+    		if(PORTC <= 0x00){
+    			break;
+    		}
+    		PORTC--;
+    		break;
+    		case SM_Clr:
     		PORTC = 0x00;
-    		PORTB = 0x00;
-    		break;
-    		case SM_A2Press:
-    		PORTC = 0x01;
-    		break;
-    		case SM_A2Release:
-    		PORTC = 0x02;
-    		break;
-    		case SM_Unlock:
-    		PORTC = 0x03;
-    		PORTB = 0x01;
     		break; 
     		default:
     		break;
     	}
     }
-    STATE = SM_Lock;
+    PORTC = 0x07;
+    STATE = SM_Start;
     while (1) {
     	Tick_Cnt();
     }
