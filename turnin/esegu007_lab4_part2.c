@@ -72,13 +72,13 @@ int main(void) {
     		case SM_Start:
     		PORTC = 0x07;
     		break;
-    		case SM_Inc:
+    		case SM_A0:
     		if(PORTC >= 0x09){
     			break;
     		}
     		PORTC++;
     		break;
-    		case SM_Dec:
+    		case SM_A1:
     		if(PORTC <= 0x00){
     			break;
     		}
