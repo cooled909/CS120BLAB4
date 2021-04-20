@@ -54,7 +54,7 @@ int main(void) {
     		STATE = SM_Hold;
     		break;
     		case SM_Dec:
-    		LASTSTATE = SM_Clr;
+    		LASTSTATE = SM_Dec;
     		STATE = SM_Hold;
     		break;
     		case SM_Clr:
